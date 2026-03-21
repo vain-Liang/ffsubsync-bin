@@ -32,7 +32,7 @@ jobs:
 
       - name: Download ffmpeg binary
         run: |
-          curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o resources/ffmpeg-release-full.7z
+          curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ./resources/ffmpeg-release-full.7z
           mkdir -p resources/ffmpeg-bin
           7z e ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
 
