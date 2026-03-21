@@ -43,7 +43,6 @@ jobs:
       - name: Build executable
         run: |
           uv run pyinstaller --clean -y \
-            --exclude-module webrtcvad \
             --dist ./dist/ffsubsync_bin build.spec
 
       - name: Move to DIST_DIR
