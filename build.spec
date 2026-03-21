@@ -7,18 +7,22 @@ import ffsubsync.ffsubsync
 ffmpeg_bin = os.path.join(os.curdir, 'resources/ffmpeg-bin')
 datas = []
 
-if platform.system() == 'Windows':
-    arch_bits = int(platform.architecture()[0][:2])
-    if arch_bits == 64:
-        datas.append((os.path.join(os.curdir, 'resources/VCRUNTIME140_1.dll'), '.'))
+# if platform.system() == 'Windows':
+    # arch_bits = int(platform.architecture()[0][:2])
+    # if arch_bits == 64:
+        # datas.append((os.path.join(os.curdir, 'resources/VCRUNTIME140_1.dll'), '.'))
 
-a = Analysis([os.path.join(os.curdir, 'main.py')],
+a = Analysis(
+  [os.path.join(os.curdir, 'main.py')],
   datas=datas,
   hookspath=[],
   runtime_hooks=[],
   excludes=[],
   hiddenimports=['pkg_resources.py2_warn'],  # ref: https://github.com/pypa/setuptools/issues/1963
   binaries=[(ffmpeg_bin, 'ffmpeg-bin')],
+  # '--collect-binaries=python' or '--onefile --collect-all pkg_resources'
+  # win_no_prefer_redirects=False,
+  # win_private_assemblies=False,
 )
 
 pyz = PYZ(a.pure)
