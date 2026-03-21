@@ -38,23 +38,19 @@ jobs:
       - name: Extract FFmpeg binary using 7-Zip
         run: |
           mkdir -p resources/ffmpeg-bin
-          7z e resources/ffmpeg-release-full.7z ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
-
-      - name: Get site-package path
-        run: |
-          echo "SITE_PACKAGES=$(uv run python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
-
-      - name: Path for windows
-        run: |
-          rm -f "$SITE_PACKAGES/_pyinstaller_hooks_contrib/stdhooks/hook-webrtcvad.py"
+          7z e resources/ffmpeg-release-full.7z */bin/ffmpeg.exe */bin/ffprobe.exe -oresources/ffmpeg-bin
 
       - name: Build executable
-        run: uv run pyinstaller --clean -y --dist ./dist/ffsubsync_bin build.spec
+        run: |
+          uv run pyinstaller --clean -y \
+            --exclude-module webrtcvad \
+            --dist ./dist/ffsubsync_bin build.spec
 
       - name: Move to DIST_DIR
+        shell: pwsh
         run: |
-          mkdir -p $DIST_DIR
-          mv dist/ffsubsync_bin/ffsubsync_bin.exe $DIST_DIR/ffsubsync_bin.exe
+          New-Item -ItemType Directory -Force -Path $env:DIST_DIR
+          Copy-Item -Path dist\ffsubsync_bin\ffsubsync_bin.exe -Destination $env:DIST_DIR/ffsubsync_bin.exe
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
