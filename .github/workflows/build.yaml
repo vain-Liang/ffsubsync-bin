@@ -30,9 +30,13 @@ jobs:
       - name: Install dependencies
         run: uv pip install -r requirements.txt
 
-      - name: Download ffmpeg binary
+      - name: Download FFmpeg binary archive
+        shell: pwsh
         run: |
-          curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ./resources/ffmpeg-release-full.7z
+          Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z" -OutFile "resources/ffmpeg-release-full.7z"
+          
+      - name: Extract FFmpeg binary using 7-Zip
+        run: |
           mkdir -p resources/ffmpeg-bin
           7z e ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
 
