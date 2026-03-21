@@ -5,81 +5,57 @@ on:
   push:
     branches:
       - master
-    tags:
-      - v*
 
 env:
   DIST_DIR: /tmp/builds
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        include:
-          - os: windows-latest
-            build: win-x64
-            file_name: win_amd64
-          - os: ubuntu-latest
-            build: linux-x64
-            file_name: linux_amd64
-          - os: macos-latest
-            build: osx-arm64
-            file_name: macos_arm64
-
-    runs-on: ${{ matrix.os }}
+    runs-on: windows-latest
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-          cache: "pip"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
-      - run: pip install -r requirements.txt
+      - name: Create virtual environment
+        run: uv venv --python 3.13
 
-      - if: matrix.os != 'macos-latest'
-        name: Install UPX
-        uses: crazy-max/ghaction-upx@v3
-        with:
-          install-only: true
+      - name: Install dependencies
+        run: uv pip install -r requirements.txt
 
-      - name: Download ffmpeg
-        run: python ffmpeg_download.py
-        shell: bash
-
-      - if: matrix.os == 'windows-latest'
-        name: Path for windows
+      - name: Download ffmpeg binary
         run: |
-          rm -f "$Python_ROOT_DIR/lib/site-packages/_pyinstaller_hooks_contrib/stdhooks/hook-webrtcvad.py"
-        shell: bash
+          wget -qO https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z resource/ffmpeg-release-full.7z
+          mkdir -p resources/ffmpeg-bin
+          7z e ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
+
+      - name: Get site-package path
+        run: |
+          echo "SITE_PACKAGES=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
+
+      - name: Path for windows
+        run: |
+          rm -f "$SITE_PACKAGES/_pyinstaller_hooks_contrib/stdhooks/hook-webrtcvad.py"
 
       - name: Build executable
-        run: pyinstaller --clean -y --dist ./dist/ffsubsync_bin *.spec
-        shell: bash
+        run: pyinstaller --clean -y --dist ./dist/ffsubsync_bin build.spec
 
-      - if: matrix.os != 'windows-latest'
-        name: Move to DIST_DIR (*nix)
+      - name: Move to DIST_DIR
         run: |
           mkdir -p $DIST_DIR
-          mv dist/ffsubsync_bin/ffsubsync_bin $DIST_DIR/ffsubsync_bin_${{ matrix.file_name }}
-        shell: bash
-
-      - if: matrix.os == 'windows-latest'
-        name: Move to DIST_DIR (win)
-        run: |
-          New-Item -ItemType Directory -Force -Path $env:DIST_DIR
-          Copy-Item -Path dist\ffsubsync_bin\ffsubsync_bin.exe -Destination $env:DIST_DIR/ffsubsync_bin_${{ matrix.file_name }}
-        shell: pwsh
+          mv dist/ffsubsync_bin/ffsubsync_bin.exe $DIST_DIR/ffsubsync_bin.exe
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: build-${{ matrix.file_name }}
+          name: build-win11-ffsubsync_bin.exe
           path: ${{ env.DIST_DIR }}/*
           if-no-files-found: error
           retention-days: 1
@@ -90,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download builds
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: ${{ env.DIST_DIR }}
           pattern: build-*
