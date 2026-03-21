@@ -42,7 +42,7 @@ jobs:
 
       - name: Get site-package path
         run: |
-          echo "SITE_PACKAGES=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
+          echo "SITE_PACKAGES=$(uv run python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
 
       - name: Path for windows
         run: |
