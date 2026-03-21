@@ -38,7 +38,7 @@ jobs:
       - name: Extract FFmpeg binary using 7-Zip
         run: |
           mkdir -p resources/ffmpeg-bin
-          7z e ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
+          7z e resources/ffmpeg-release-full.7z ffmpeg-8.0.1-full_build/bin/ffmpeg.exe ffmpeg-8.0.1-full_build/bin/ffprobe.exe -o/resources/ffmpeg-bin
 
       - name: Get site-package path
         run: |
