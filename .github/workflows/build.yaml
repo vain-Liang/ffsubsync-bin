@@ -49,7 +49,7 @@ jobs:
           rm -f "$SITE_PACKAGES/_pyinstaller_hooks_contrib/stdhooks/hook-webrtcvad.py"
 
       - name: Build executable
-        run: pyinstaller --clean -y --dist ./dist/ffsubsync_bin build.spec
+        run: uv run pyinstaller --clean -y --dist ./dist/ffsubsync_bin build.spec
 
       - name: Move to DIST_DIR
         run: |
