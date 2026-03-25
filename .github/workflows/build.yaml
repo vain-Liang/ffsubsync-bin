@@ -42,7 +42,7 @@ jobs:
 
       - name: Build executable
         run: |
-          rm -f "$Python_ROOT_DIR/lib/site-packages/_pyinstaller_hooks_contrib/stdhooks/hook-webrtcvad.py"
+          find .venv -name "hook-webrtcvad.py" -delete || echo "Hook file not found, skipping."
           uv run pyinstaller --clean -y --dist ./dist/ffsubsync_bin build.spec
 
       - name: Move to DIST_DIR
